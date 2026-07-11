@@ -1,204 +1,199 @@
 ---
 name: cccf
-description: Interroger et corriger la dette sécurité/qualité d'un repo via l'index Semgrep de ccc-findings. Déclencheurs — vulnérabilité, sécurité, semgrep, finding, dette, audit.
+description: Query and fix a repository's security/quality debt through the ccc-findings Semgrep index. Triggers — vulnerability, security, semgrep, finding, debt, audit.
 ---
 
 # ccc-findings (cccf)
 
-Index Semgrep local, interrogeable en langage naturel, joint au code via `ccc`.
-Le skill doit aider l'agent à répondre vite, avec peu de bruit, sans relancer un
-scan complet dès qu'une question sécurité apparaît.
+Local Semgrep index, searchable in natural language and joined with code through
+`ccc`. This skill helps the agent answer quickly, with little noise, without
+rerunning a full scan every time a security question appears.
 
-## Règle d'or UX
+## UX golden rule
 
-Commencer par la requête la moins coûteuse qui répond à la question, puis
-demander plus de contexte seulement quand il faut agir :
+Start with the cheapest query that answers the question, then ask for more
+context only when action is needed:
 
-1. Vue globale → `findings_summary()`.
-2. Question ou fichier précis → `search_findings(...)`.
-3. Exploration de code avec dette associée → `search_code_with_findings(...)`.
-4. Après patch → `reindex_findings()` puis la même recherche qu'avant patch.
+1. Global overview → `findings_summary()`.
+2. Specific question or file → `search_findings(...)`.
+3. Code exploration with associated debt → `search_code_with_findings(...)`.
+4. After a patch → `reindex_findings()` then rerun the same search as before the patch.
 
-Ne jamais noyer l'utilisateur sous le JSON brut : résumer les findings utiles,
-leurs fichiers/lignes, et l'action proposée ou réalisée.
+Never drown the user in raw JSON: summarize the useful findings, their
+files/lines, and the proposed or completed action.
 
-## Choisir le bon tool
+## Choose the right tool
 
-| Besoin utilisateur | Tool à utiliser | Sortie attendue côté agent |
+| User need | Tool to use | Expected agent output |
 |---|---|---|
-| « Fais un état des lieux sécurité » | `findings_summary()` | 3-5 lignes : sévérités, règles principales, zones chaudes. |
-| « Y a-t-il une injection SQL ? » | `search_findings(query="injection sql", limit=5)` | Findings pertinents, triés, sans contexte détaillé au premier appel. |
-| « Je vais modifier ce fichier » | `search_findings(path_glob="<fichier>*", limit=10)` | Prévenir les findings connus sur le fichier avant patch. |
-| « Montre le code de session avec ses problèmes » | `search_code_with_findings(query="gestion session")` | Résultats code annotés par findings et sévérité max. |
-| « Corrige ce finding » | `search_findings(..., include_context=true)` puis patch | Lire le contexte avant toute modification. |
-| « Vérifie après correction » | `reindex_findings()` puis `search_findings(...)` | Confirmer disparition ou expliquer le blocage. |
+| "Give me a security overview" | `findings_summary()` | 3-5 lines: severities, main rules, hot spots. |
+| "Is there a SQL injection?" | `search_findings(query="sql injection", limit=5)` | Relevant findings, sorted, without detailed context on the first call. |
+| "I am going to edit this file" | `search_findings(path_glob="<file>*", limit=10)` | Warn about known findings on the file before patching. |
+| "Show session code with its issues" | `search_code_with_findings(query="session management")` | Code results annotated with findings and max severity. |
+| "Fix this finding" | `search_findings(..., include_context=true)` then patch | Read the context before any modification. |
+| "Verify after the fix" | `reindex_findings()` then `search_findings(...)` | Confirm disappearance or explain the blocker. |
 
-## Parcours agréable par défaut
+## Pleasant default path
 
-Quand la demande est large ou ambiguë :
+When the request is broad or ambiguous:
 
-1. Appeler `findings_summary()` pour mesurer le volume.
-2. Si des `ERROR` existent, chercher d'abord les problèmes critiques :
-   `search_findings(query="sécurité critique", severity="ERROR", limit=5)`.
-3. Proposer ou appliquer une correction seulement après avoir récupéré le
-   contexte d'un finding précis avec `include_context: true`.
+1. Call `findings_summary()` to assess volume.
+2. If `ERROR` findings exist, look at critical issues first:
+   `search_findings(query="critical security", severity="ERROR", limit=5)`.
+3. Propose or apply a fix only after retrieving the context of a precise finding
+   with `include_context: true`.
 
-Quand la demande cible un fichier :
+When the request targets a file:
 
-1. Appeler `search_findings(path_glob="<fichier>*", limit=10)`.
-2. Si aucun finding n'est connu, le dire simplement et continuer la tâche.
-3. Si des findings existent, les prendre en compte avant de modifier le fichier.
+1. Call `search_findings(path_glob="<file>*", limit=10)`.
+2. If no known finding exists, say so plainly and continue the task.
+3. If findings exist, account for them before editing the file.
 
-Quand la demande demande une correction :
+When the request asks for a fix:
 
-1. Rechercher le finding avec les filtres les plus précis disponibles.
-2. Relire le contexte (`include_context: true`) ou le fichier source.
-3. Patcher le code en respectant `fix` si Semgrep en fournit un.
-4. Si le MCP Semgrep officiel est disponible, scanner seulement le fichier
-   modifié pour une vérification fraîche.
-5. Appeler `reindex_findings()`.
-6. Relancer la même recherche qu'au départ pour confirmer la disparition.
-7. Après 2 tentatives infructueuses, arrêter et expliquer le blocage.
+1. Search for the finding with the most precise available filters.
+2. Re-read the context (`include_context: true`) or the source file.
+3. Patch the code, respecting `fix` if Semgrep provides one.
+4. If the official Semgrep MCP is available, scan only the modified file for a
+   fresh verification.
+5. Call `reindex_findings()`.
+6. Rerun the same search as at the start to confirm the finding disappeared.
+7. After 2 unsuccessful attempts, stop and explain the blocker.
 
 ## Installation
 
-1. **Semgrep** (dépendance requise par `cccf`) : `pipx install semgrep` (ou
-   `brew install semgrep`).
-2. **cccf** : `uv tool install ccc-findings` (ou `pipx install ccc-findings`).
-3. **Modèle d'embedding** : téléchargé automatiquement au premier `cccf index`
-   (`sentence-transformers`, modèle `Snowflake/snowflake-arctic-embed-xs` par
-   défaut, ~100 Mo) — accès réseau nécessaire une seule fois, les exécutions
-   suivantes réutilisent le cache local (`~/.cache/huggingface`).
-4. **Initialiser et indexer le repo cible** :
+1. **Semgrep** (required by `cccf`): `pipx install semgrep` or
+   `brew install semgrep`.
+2. **cccf**: `uv tool install ccc-findings` or `pipx install ccc-findings`.
+3. **Embedding model**: downloaded automatically on the first `cccf index`
+   (`sentence-transformers`, default model `Snowflake/snowflake-arctic-embed-xs`,
+   ~100 MB). Network access is required once; later runs reuse the local cache
+   (`~/.cache/huggingface`).
+4. **Initialize and index the target repo**:
    ```bash
-   cd <votre-repo>
-   cccf init                # détecte .semgrep.yml/semgrep.yml/.semgrep ;
-                              # sinon, --rules <chemin-ou-pack>, sinon repli
-                              # automatique sur le pack p/security-audit
+   cd <your-repo>
+   cccf init                # detects .semgrep.yml/semgrep.yml/.semgrep;
+                            # otherwise use --rules <path-or-pack>, or falls
+                            # back automatically to the p/security-audit pack
    cccf index
    ```
-5. **Enregistrer le serveur MCP `cccf`** auprès du client (ex. `.mcp.json` à
-   la racine du projet pour Claude Code, ou l'équivalent de votre client) :
+5. **Register the `cccf` MCP server** with the client (for example `.mcp.json`
+   at the project root for Claude Code, or your client's equivalent):
    ```json
    {"mcpServers": {"cccf": {"command": "cccf", "args": ["mcp"]}}}
    ```
-6. **(Recommandé) Enregistrer aussi le MCP Semgrep officiel**, utilisé à
-   l'étape 4 du Workflow 3 pour la vérification fraîche post-patch :
+6. **(Recommended) Also register the official Semgrep MCP**, used in step 4 of
+   Workflow 3 for fresh post-patch verification:
    ```json
    {"mcpServers": {"semgrep": {"command": "uvx", "args": ["semgrep-mcp"]}}}
    ```
-   Sans lui, cette étape est simplement sautée : `reindex_findings` +
-   `search_findings` (étapes 5-6 du Workflow 3) suffisent à vérifier la
-   disparition du finding, avec une confiance moindre qu'un scan frais.
+   Without it, that step is simply skipped: `reindex_findings` +
+   `search_findings` (steps 5-6 of Workflow 3) are enough to verify that the
+   finding disappeared, with lower confidence than a fresh scan.
 
-## Configurer les règles Semgrep à analyser
+## Configure the Semgrep rules to analyze
 
-Le champ `rules` de `.cccf/config.yml` est le point de contrôle de ce qui
-est analysé. Sans rien de spécifié, `cccf init` utilise déjà le pack
-registry `p/security-audit` par défaut (voir Installation, étape 4) — cette
-section sert à le personnaliser. Sources valides (mélangeables dans une
-même liste) :
+The `rules` field in `.cccf/config.yml` controls what is analyzed. If nothing
+is specified, `cccf init` already uses the default registry pack
+`p/security-audit` (see Installation, step 4). This section is for
+customization. Valid sources can be mixed in the same list:
 
-- **Fichier de règles local**, ex. `rules/rules.yml`, au format Semgrep
-  standard (`rules: [{id, pattern, message, severity, languages,
+- **Local rules file**, for example `rules/rules.yml`, in standard Semgrep
+  format (`rules: [{id, pattern, message, severity, languages,
   metadata: {cwe, owasp}}, ...]`).
-- **Dossier de règles** : chemin vers un dossier contenant plusieurs YAML,
-  chargés ensemble.
-- **Pack registry Semgrep**, ex. `p/security-audit`, `p/python`,
-  `p/owasp-top-ten` — accès réseau nécessaire au premier usage (Semgrep
-  télécharge/cache le pack).
+- **Rules directory**: path to a directory containing several YAML files, loaded
+  together.
+- **Semgrep registry pack**, for example `p/security-audit`, `p/python`,
+  `p/owasp-top-ten`. Network access is required the first time Semgrep downloads
+  and caches the pack.
 
-Définir à l'init (`--rules` est répétable) :
+Define rules at init time (`--rules` is repeatable):
 ```bash
 cccf init --rules rules/rules.yml --rules p/security-audit
 ```
-ou éditer directement `.cccf/config.yml` a posteriori :
+or edit `.cccf/config.yml` directly afterward:
 ```yaml
 rules:
   - rules/rules.yml
   - p/security-audit
 ```
-Puis appliquer le changement à tout le repo avec un scan complet :
+Then apply the change to the whole repo with a full scan:
 ```bash
 cccf index --full
 ```
-**Piège pour un agent** : le tool MCP `reindex_findings` est toujours
-incrémental (il ne re-scanne que les fichiers modifiés). Après un changement
-de `rules`, `reindex_findings` seul ne réanalyse PAS les fichiers déjà
-indexés avec l'ancienne config — il faut passer par `cccf index --full` en
-CLI (pas d'équivalent `--full` côté MCP).
+**Agent trap**: the MCP tool `reindex_findings` is always incremental; it only
+rescans modified files. After changing `rules`, `reindex_findings` alone does
+NOT reanalyze files already indexed with the old config. Use `cccf index --full`
+from the CLI instead; there is no MCP `--full` equivalent.
 
-`min_severity` (`INFO`/`WARNING`/`ERROR`, même fichier) filtre ce qui est
-conservé en base parmi ce que les règles trouvent — un réglage indépendant
-du choix des règles elles-mêmes.
+`min_severity` (`INFO`/`WARNING`/`ERROR`, same file) filters what is kept in the
+database among the findings discovered by the rules. It is independent from the
+choice of rules themselves.
 
-## Workflows de référence
+## Reference workflows
 
-### Workflow 1 — Explorer les problèmes connus
+### Workflow 1 — Explore known issues
 
-1. Appeler `search_findings(query="<description du problème>", limit=5)`.
-2. Sur le finding retenu, rappeler `search_findings` avec le même filtre et
-   `include_context: true` pour obtenir le code entourant le finding.
+1. Call `search_findings(query="<issue description>", limit=5)`.
+2. For the selected finding, call `search_findings` again with the same filter
+   and `include_context: true` to retrieve the surrounding code.
 
-### Workflow 2 — Avant de modifier un fichier
+### Workflow 2 — Before editing a file
 
-1. Appeler `search_findings(path_glob="<fichier>*")` pour lister les
-   findings connus sur ce fichier avant de le patcher.
+1. Call `search_findings(path_glob="<file>*")` to list known findings on that
+   file before patching it.
 
-### Workflow 3 — Boucle de correction
+### Workflow 3 — Fix loop
 
-1. `search_findings(query="...", severity="ERROR", path_glob="...")` pour
-   lister les findings à corriger.
-2. Relire le contexte de chaque finding (`include_context: true`).
-3. Patcher le code, en respectant le champ `fix` du finding s'il est fourni.
-4. Si le MCP Semgrep officiel est disponible, appeler son tool
-   `semgrep_scan` sur le seul fichier modifié pour une vérification fraîche
-   immédiate (ne pas scanner tout le repo).
-5. Appeler `reindex_findings` pour mettre à jour l'index `cccf`.
-6. Rappeler `search_findings` avec le même filtre qu'à l'étape 1 pour
-   confirmer la disparition du finding.
-7. Si le finding persiste après 2 tentatives de correction, ne pas
-   réessayer une 3e fois : rapporter le blocage à l'utilisateur.
+1. `search_findings(query="...", severity="ERROR", path_glob="...")` to list
+   findings to fix.
+2. Re-read each finding's context (`include_context: true`).
+3. Patch the code, respecting the finding's `fix` field if provided.
+4. If the official Semgrep MCP is available, call its `semgrep_scan` tool on the
+   modified file only for immediate fresh verification. Do not scan the whole repo.
+5. Call `reindex_findings` to update the `cccf` index.
+6. Call `search_findings` again with the same filter as step 1 to confirm the
+   finding disappeared.
+7. If the finding still exists after 2 fix attempts, do not try a 3rd time:
+   report the blocker to the user.
 
-### Workflow 4 — Vue d'ensemble
+### Workflow 4 — Overview
 
-1. Appeler `findings_summary()` pour un état agrégé (sévérités, top
-   règles) à faible coût de tokens.
+1. Call `findings_summary()` for a low-token aggregate state (severities, top rules).
 
-## Recherche croisée code + findings
+## Cross-search code + findings
 
-Pour explorer du code en tenant compte de sa dette sécurité, préférer
-`search_code_with_findings(query="...")` à une recherche `ccc` seule : il
-annote chaque résultat de code des findings Semgrep connus qui le
-recouvrent.
+To explore code while accounting for its security debt, prefer
+`search_code_with_findings(query="...")` over a plain `ccc` search: it annotates
+each code result with known Semgrep findings that overlap it.
 
 ## Anti-patterns
 
-- Ne pas scanner tout le repo via le MCP Semgrep officiel (`semgrep_scan`
-  sans cible précise) : utiliser l'index `cccf` (`search_findings`,
-  `findings_summary`) pour tout ce qui est déjà indexé, et ne réserver le
-  MCP Semgrep officiel qu'à la vérification post-patch d'un fichier précis.
-- Ne pas corriger un finding sans avoir lu son contexte
-  (`include_context: true` ou lecture directe du fichier).
-- Ne pas supprimer un commentaire `# nosemgrep` existant : il reflète une
-  décision déjà prise sur un faux positif.
-- Ne pas afficher la réponse JSON brute si l'utilisateur n'a pas demandé du
-  JSON : transformer les résultats en synthèse actionnable.
-- Ne pas bloquer si `ccc` est indisponible : `search_code_with_findings`
-  retourne un fallback findings, à utiliser pour poursuivre l'analyse.
+- Do not scan the whole repo through the official Semgrep MCP (`semgrep_scan`
+  without a precise target): use the `cccf` index (`search_findings`,
+  `findings_summary`) for everything already indexed, and reserve the official
+  Semgrep MCP for post-patch verification of one precise file.
+- Do not fix a finding before reading its context (`include_context: true` or
+  direct source file reading).
+- Do not remove an existing `# nosemgrep` comment: it represents an existing
+  decision about a false positive.
+- Do not display the raw JSON response unless the user explicitly asks for JSON:
+  turn results into an actionable summary.
+- Do not block if `ccc` is unavailable: `search_code_with_findings` returns a
+  findings fallback that can be used to continue the analysis.
 
-## Format de réponse recommandé
+## Recommended response format
 
-Répondre court et orienté décision :
+Answer briefly and decision-first:
 
 ```text
-J'ai trouvé 2 findings ERROR dans src/payments/.
-- src/payments/db.py:42 — injection SQL possible (CWE-89), corrigé et réindexé.
-- src/payments/token.py:18 — génération de token faible, reste à corriger.
+I found 2 ERROR findings in src/payments/.
+- src/payments/db.py:42 — possible SQL injection (CWE-89), fixed and reindexed.
+- src/payments/token.py:18 — weak token generation, still needs a fix.
 ```
 
-Si rien n'est trouvé :
+If nothing is found:
 
 ```text
-Aucun finding Semgrep connu sur src/payments/*. L'index est à jour après reindex_findings.
+No known Semgrep finding on src/payments/*. The index is up to date after reindex_findings.
 ```
