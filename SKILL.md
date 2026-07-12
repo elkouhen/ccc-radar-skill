@@ -62,6 +62,11 @@ When the request asks for a fix:
 
 ## Installation
 
+Installing this skill file only makes these instructions available — it does
+not install Semgrep, `cccf`, or register the MCP servers. Before the first use
+of any tool below (`findings_summary`, `search_findings`, ...), check whether
+they respond; if not, run the steps below yourself (or ask the user to).
+
 0. **This skill**: `npx skills add https://github.com/elkouhen/cocoindex-ext-skill`
    (mono-skill repo — installs `cccf` directly, no `--skill` flag needed).
 1. **Semgrep** (required by `cccf`): `pipx install semgrep` or
