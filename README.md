@@ -31,11 +31,14 @@ automatically by the agent.
   init` (see **Default Rules** in `SKILL.md`; see `ccc-findings`'s
   `archive/BACKLOG-10.md` K11).
 - [`skills/cccf/rules/kafka/`](skills/cccf/rules/kafka/) — bundled Semgrep
-  rule pack (Java/Spring) that inventories Kafka producers/consumers
-  (`@KafkaListener`, `KafkaTemplate.send`, `ProducerRecord`) for `cccf
-  endpoints`/`cccf graph`, resolving topic names given as Spring properties
-  (`${app.kafka.topics.orders}`) against `application.yml`/`.properties`
-  when present — not a findings pack, run by default on `cccf init` (see
+  rule pack (Java/Spring, plus raw `kafka-clients`) that inventories Kafka
+  producers/consumers (`@KafkaListener`, `KafkaTemplate.send`,
+  `ProducerRecord`, and `KafkaConsumer.subscribe(...)` for non-Spring
+  consumers) for `cccf endpoints`/`cccf graph`, resolving topic names given
+  as Spring properties (`${app.kafka.topics.orders}`, including via a
+  `@Value`-annotated field referenced by variable) against
+  `application.yml`/`.properties` when present — not a findings pack, run
+  by default on `cccf init` (see
   `ccc-findings`'s `archive/BACKLOG-10.md` K2).
 - [`skills/cccf/rules/kafka-security/`](skills/cccf/rules/kafka-security/)
   — bundled Semgrep rule pack (Java/Spring) for Kafka security findings:
