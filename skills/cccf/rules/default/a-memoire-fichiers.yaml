@@ -27,7 +27,7 @@ rules:
       R1 — un ByteArrayOutputStream qui accumule la copie d'un flux entier
       reconstitue le fichier en mémoire. Vérifier qu'il ne sert pas à
       bufferiser un fichier/pièce jointe entier ; sinon écrire directement
-      vers un OutputStream borné (fichier temporaire, S3).
+      vers un OutputStream borné (fichier temporaire).
     metadata:
       regle: R1
       reference: design-rules.md#r1
@@ -88,22 +88,6 @@ rules:
     pattern-either:
       - pattern: $U.unmarshal($STREAM_OU_SOURCE)
 
-  - id: r1-pdfbox-load-depuis-bytes
-    languages: [java]
-    severity: ERROR
-    message: >
-      R1/R17 — chargement d'un PDF depuis un tableau d'octets ou un
-      InputStream complet. Un PDF n'est pas streamable (xref en fin de
-      fichier) : spooler sur disque local puis charger via
-      RandomAccessReadBufferedFile (voir R17).
-    metadata:
-      regle: R1, R17
-      reference: design-rules.md#r17
-    pattern-either:
-      - pattern: org.apache.pdfbox.pdmodel.PDDocument.load(...)
-      - pattern: org.apache.pdfbox.Loader.loadPDF($BYTES)
-      - pattern: org.apache.pdfbox.Loader.loadPDF($BYTES, ...)
-
   - id: r1-lecture-integrale-texte
     languages: [java]
     severity: ERROR
@@ -127,46 +111,7 @@ rules:
       - pattern: org.springframework.util.FileCopyUtils.copyToByteArray(...)
       - pattern: org.springframework.util.FileCopyUtils.copyToString(...)
 
-  - id: r1-s3-objet-materialise-en-memoire
-    languages: [java]
-    severity: ERROR
-    message: >
-      R1/R12 — objet S3 récupéré entièrement en mémoire (getObjectAsBytes /
-      ResponseTransformer.toBytes). Un fichier stocké en object storage peut
-      être volumineux : consommer le flux de réponse (getObject(req) ->
-      InputStream) ou télécharger vers un fichier temporaire
-      (ResponseTransformer.toFile) pour les accès aléatoires (R17).
-    metadata:
-      regle: R1
-      reference: design-rules.md#r1
-    pattern-either:
-      - pattern: $S3.getObjectAsBytes(...)
-      - pattern: $S3.getObject($REQ, software.amazon.awssdk.core.sync.ResponseTransformer.toBytes())
-      - pattern: $S3.getObject($REQ, ResponseTransformer.toBytes())
-      - pattern: com.amazonaws.util.IOUtils.toByteArray(...)
-
   # --- R2 : upload/download en streaming pur ---
-
-  - id: r2-upload-s3-depuis-memoire
-    languages: [java]
-    severity: WARNING
-    message: >
-      R2 — corps d'upload S3 construit depuis un tableau d'octets complet
-      (RequestBody.fromBytes / fromByteBuffer). Acceptable uniquement sur un
-      contenu borné et contrôlé (petit jeu de données extrait) ; pour un
-      fichier entrant, streamer au fil de l'eau (multipart upload S3,
-      RequestBody.fromInputStream avec taille connue, ou fromFile après
-      spool disque).
-    metadata:
-      regle: R2
-      reference: design-rules.md#r2
-    pattern-either:
-      - pattern: software.amazon.awssdk.core.sync.RequestBody.fromBytes(...)
-      - pattern: software.amazon.awssdk.core.sync.RequestBody.fromByteBuffer(...)
-      - pattern: software.amazon.awssdk.core.async.AsyncRequestBody.fromBytes(...)
-      - pattern: RequestBody.fromBytes(...)
-      - pattern: RequestBody.fromByteBuffer(...)
-      - pattern: AsyncRequestBody.fromBytes(...)
 
   - id: r2-corps-requete-byte-array
     languages: [java]
@@ -174,9 +119,9 @@ rules:
     message: >
       R2 — corps de requête HTTP reçu en byte[]/String via @RequestBody : le
       framework matérialise le corps entier en heap avant d'appeler la
-      méthode. Pour un dépôt de fichier, consommer le flux au fil de l'eau
-      (multipart streaming, InputStream de la requête) et écrire directement
-      vers S3.
+      méthode. Pour un upload de fichier, consommer le flux au fil de l'eau
+      (multipart streaming, InputStream de la requête) et l'écrire
+      directement vers sa destination finale.
     metadata:
       regle: R2
       reference: design-rules.md#r2
@@ -191,8 +136,8 @@ rules:
       R2 — réponse HTTP construite sur un byte[] complet
       (ResponseEntity<byte[]>) : le fichier entier transite par la heap à
       chaque téléchargement. Restituer en streaming
-      (InputStreamResource/StreamingResponseBody proxy S3 -> client) ou via
-      URL présignée.
+      (InputStreamResource/StreamingResponseBody proxy source -> client) ou
+      via URL présignée si la destination le permet.
     metadata:
       regle: R2
       reference: design-rules.md#r2
@@ -206,7 +151,7 @@ rules:
     message: >
       R2 — getBytes() sur un fichier/multipart matérialise le corps de
       requête entier en heap. Consommer le flux au fil de l'eau et l'écrire
-      directement vers S3 (multipart upload).
+      directement vers sa destination finale.
     metadata:
       regle: R2
       reference: design-rules.md#r2

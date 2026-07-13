@@ -7,8 +7,9 @@ rules:
     message: >
       R5 — un contenu de fichier (bytes/payload) semble être envoyé
       directement dans un message Kafka. Un événement ne doit porter que des
-      identifiants métier, une référence S3 (bucket/key), un sha256, une
-      taille et un format — jamais le contenu (claim check).
+      identifiants métier, une référence vers l'emplacement où le fichier
+      est stocké (clé/identifiant), un sha256, une taille et un format —
+      jamais le contenu (claim check).
     metadata:
       regle: R5
       reference: design-rules.md#r5
@@ -31,7 +32,8 @@ rules:
       qu'un payload fichier transite par Kafka au lieu du claim check : la
       taille applicative max d'un événement est de 256 Ko (marge sous la
       limite broker de 1 Mo). Si la limite doit monter, c'est le design de
-      l'événement qu'il faut corriger (référence S3, pas le contenu).
+      l'événement qu'il faut corriger (une référence vers le fichier, pas
+      son contenu).
     metadata:
       regle: R5
       reference: design-rules.md#r5

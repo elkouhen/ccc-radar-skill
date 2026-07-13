@@ -24,13 +24,11 @@ The agent owns the `cccf` lifecycle for the current project — initialization, 
 This skill bundles two Semgrep rule packs:
 
 - `default` ([`rules/default/`](rules/default/)) — Java rules for bounded,
-  streaming-safe handling of files, Kafka events, and data storage: bounded
-  streaming for files (`a-memoire-fichiers.yaml`, R1-R3), Kafka claim-check
-  and delivery guarantees (`b-kafka.yaml`, R5-R10), object storage as the
-  source of truth for file data (`c-donnees.yaml`, R12-R13), and safe
-  PDF/archive handling (`d-pdf-archives.yaml`, R17-R18). The prose behind
-  each rule ID (including the design-only rules not enforced by a Semgrep
-  pattern — R4, R9, R11, R14-R16) lives in
+  streaming-safe handling of files and Kafka events: bounded streaming for
+  files (`a-memoire-fichiers.yaml`, R1-R3) and Kafka claim-check/delivery
+  guarantees (`b-kafka.yaml`, R5-R10). The prose behind each rule ID
+  (including the design-only rules not enforced by a Semgrep pattern — R4,
+  R9, R11) lives in
   [`rules/default/design-rules.md`](rules/default/design-rules.md), which
   travels with the pack when copied into a target repo so the `reference:
   design-rules.md#rN` in each rule's metadata keeps resolving.
@@ -57,8 +55,6 @@ user explicitly asks for a different rule set:
    cccf init \
      --rules .cccf/rules/default/a-memoire-fichiers.yaml \
      --rules .cccf/rules/default/b-kafka.yaml \
-     --rules .cccf/rules/default/c-donnees.yaml \
-     --rules .cccf/rules/default/d-pdf-archives.yaml \
      --rules .cccf/rules/liveness/java.yaml \
      --rules .cccf/rules/liveness/python.yaml
    ```
