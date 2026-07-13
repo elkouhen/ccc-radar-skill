@@ -6,12 +6,12 @@ rules:
     severity: ERROR
     message: >
       R1 — lecture intégrale d'un flux en mémoire interdite sur un flux de
-      fichier (facture, pièce jointe, archive). Utiliser un traitement par
+      fichier (document, pièce jointe, archive). Utiliser un traitement par
       flux (InputStream -> traitement -> OutputStream) avec des buffers
       bornés (8-64 Ko).
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     patterns:
       - pattern-either:
           - pattern: $STREAM.readAllBytes()
@@ -30,7 +30,7 @@ rules:
       vers un OutputStream borné (fichier temporaire, S3).
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     patterns:
       - pattern: new ByteArrayOutputStream(...)
       - pattern-not-inside: |
@@ -47,14 +47,14 @@ rules:
       flux (StAX/SAX) au lieu de matérialiser le document en mémoire.
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     patterns:
       - pattern-either:
           - pattern: new String($BYTES)
           - pattern: new String($BYTES, $CHARSET)
       - metavariable-regex:
           metavariable: $BYTES
-          regex: (?i).*(content|bytes|payload|xml|file|fichier|document|facture|pdf).*
+          regex: (?i).*(content|bytes|payload|xml|file|fichier|document|pdf).*
 
   - id: r1-dom-parsing-flux-entrant
     languages: [java]
@@ -65,7 +65,7 @@ rules:
       l'extraction sur un flux entrant non borné.
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     patterns:
       - pattern-either:
           - pattern: $DBF.newDocumentBuilder().parse(...)
@@ -79,12 +79,12 @@ rules:
     severity: INFO
     message: >
       R1 — unmarshalling JAXB détecté. Acceptable uniquement sur un
-      sous-arbre borné extrait au préalable via StAX (ex. un bloc <Invoice>
+      sous-arbre borné extrait au préalable via StAX (ex. un élément métier
       unitaire) ; jamais directement sur le document racine d'un flux
       entrant. Vérifier manuellement la source ($STREAM_OU_SOURCE).
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     pattern-either:
       - pattern: $U.unmarshal($STREAM_OU_SOURCE)
 
@@ -98,7 +98,7 @@ rules:
       RandomAccessReadBufferedFile (voir R17).
     metadata:
       regle: R1, R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     pattern-either:
       - pattern: org.apache.pdfbox.pdmodel.PDDocument.load(...)
       - pattern: org.apache.pdfbox.Loader.loadPDF($BYTES)
@@ -114,7 +114,7 @@ rules:
       avec des buffers bornés, parser le XML en StAX/SAX.
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     pattern-either:
       - pattern: java.nio.file.Files.readString(...)
       - pattern: java.nio.file.Files.readAllLines(...)
@@ -132,13 +132,13 @@ rules:
     severity: ERROR
     message: >
       R1/R12 — objet S3 récupéré entièrement en mémoire (getObjectAsBytes /
-      ResponseTransformer.toBytes). Un fichier S3 peut atteindre 120 Mo
-      (borne DGFiP par fichier) : consommer le flux de réponse
-      (getObject(req) -> InputStream) ou télécharger vers un fichier
-      temporaire (ResponseTransformer.toFile) pour les accès aléatoires (R17).
+      ResponseTransformer.toBytes). Un fichier stocké en object storage peut
+      être volumineux : consommer le flux de réponse (getObject(req) ->
+      InputStream) ou télécharger vers un fichier temporaire
+      (ResponseTransformer.toFile) pour les accès aléatoires (R17).
     metadata:
       regle: R1
-      reference: docs/regles-conception.md#r1
+      reference: design-rules.md#r1
     pattern-either:
       - pattern: $S3.getObjectAsBytes(...)
       - pattern: $S3.getObject($REQ, software.amazon.awssdk.core.sync.ResponseTransformer.toBytes())
@@ -159,7 +159,7 @@ rules:
       spool disque).
     metadata:
       regle: R2
-      reference: docs/regles-conception.md#r2
+      reference: design-rules.md#r2
     pattern-either:
       - pattern: software.amazon.awssdk.core.sync.RequestBody.fromBytes(...)
       - pattern: software.amazon.awssdk.core.sync.RequestBody.fromByteBuffer(...)
@@ -179,7 +179,7 @@ rules:
       vers S3.
     metadata:
       regle: R2
-      reference: docs/regles-conception.md#r2
+      reference: design-rules.md#r2
     pattern-either:
       - pattern: $RET $METHOD(..., @RequestBody byte[] $CORPS, ...) { ... }
       - pattern: $RET $METHOD(..., @org.springframework.web.bind.annotation.RequestBody byte[] $CORPS, ...) { ... }
@@ -195,7 +195,7 @@ rules:
       URL présignée.
     metadata:
       regle: R2
-      reference: docs/regles-conception.md#r2
+      reference: design-rules.md#r2
     pattern-either:
       - pattern: ResponseEntity<byte[]> $METHOD(...) { ... }
       - pattern: org.springframework.http.ResponseEntity<byte[]> $METHOD(...) { ... }
@@ -209,7 +209,7 @@ rules:
       directement vers S3 (multipart upload).
     metadata:
       regle: R2
-      reference: docs/regles-conception.md#r2
+      reference: design-rules.md#r2
     patterns:
       - pattern: $MF.getBytes()
       - metavariable-regex:
@@ -226,7 +226,7 @@ rules:
       depuis la DB. Utiliser une Pageable/pagination explicite.
     metadata:
       regle: R3
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
     patterns:
       - pattern: $REPO.findAll()
       - pattern-not: $REPO.findAll($PAGEABLE)
@@ -241,7 +241,7 @@ rules:
       true)) avant de construire le DocumentBuilder.
     metadata:
       regle: R3
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
       cwe: CWE-611
     patterns:
       - pattern: $DBF.newDocumentBuilder(...)
@@ -260,7 +260,7 @@ rules:
       des attaques XXE et "billion laughs".
     metadata:
       regle: R3
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
       cwe: CWE-611
     patterns:
       - pattern-either:
@@ -285,7 +285,7 @@ rules:
       true)) avant de créer le SAXParser.
     metadata:
       regle: R3
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
       cwe: CWE-611
     patterns:
       - pattern: $SPF.newSAXParser(...)
@@ -305,7 +305,7 @@ rules:
       rejet) ou supprimer la file.
     metadata:
       regle: R3, R11
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
     pattern-either:
       - pattern: new LinkedBlockingQueue()
       - pattern: new LinkedBlockingQueue<>()
@@ -323,7 +323,7 @@ rules:
       explicitement le pool (capacité de queue, nombre de threads max).
     metadata:
       regle: R3
-      reference: docs/regles-conception.md#r3
+      reference: design-rules.md#r3
     pattern-either:
       - pattern: java.util.concurrent.Executors.newCachedThreadPool(...)
       - pattern: java.util.concurrent.Executors.newWorkStealingPool(...)

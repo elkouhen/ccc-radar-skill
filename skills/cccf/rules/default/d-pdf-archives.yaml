@@ -11,7 +11,7 @@ rules:
       disque local, jamais un byte[] ni un InputStream complet.
     metadata:
       regle: R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     pattern: org.apache.pdfbox.pdmodel.PDDocument.load(...)
 
   - id: r17-loadpdf-sans-randomaccessread-fichier
@@ -24,7 +24,7 @@ rules:
       RandomAccessReadBufferedFile.
     metadata:
       regle: R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     patterns:
       - pattern: org.apache.pdfbox.Loader.loadPDF($ARG, ...)
       - pattern-not: org.apache.pdfbox.Loader.loadPDF(new RandomAccessReadBufferedFile(...), ...)
@@ -40,7 +40,7 @@ rules:
       cache sur disque.
     metadata:
       regle: R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     patterns:
       - pattern: org.apache.pdfbox.Loader.loadPDF($RAR)
       - pattern-not: org.apache.pdfbox.Loader.loadPDF($RAR, $SCP)
@@ -56,7 +56,7 @@ rules:
       (PDFBox 3.x) ou MemoryUsageSetting.setupTempFileOnly() (2.x).
     metadata:
       regle: R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     pattern-either:
       - pattern: MemoryUsageSetting.setupMainMemoryOnly(...)
       - pattern: MemoryUsageSetting.setupMixed(...)
@@ -72,17 +72,18 @@ rules:
       spooler sur disque puis utiliser RandomAccessReadBufferedFile.
     metadata:
       regle: R17
-      reference: docs/regles-conception.md#r17
+      reference: design-rules.md#r17
     pattern-either:
       - pattern: new RandomAccessReadBuffer(...)
       - pattern: new org.apache.pdfbox.io.RandomAccessReadBuffer(...)
 
   # --- R18 : décompression défensive, en streaming ---
-  # Format imposé par la DGFiP sur l'interface système d'échanges PPF :
   # tar.gz (Apache Commons Compress : TarArchiveInputStream +
-  # GzipCompressorInputStream), pas ZIP. Les patterns restent génériques sur
-  # le nom de variable/entrée ($TIS/$ENTRY) : ils couvrent la forme de code
-  # quel que soit le type déclaré (TarArchiveInputStream, ZipInputStream...).
+  # GzipCompressorInputStream) est le format de référence pour ce type de
+  # flux ; les mêmes bornes s'appliquent à ZIP s'il doit être accepté. Les
+  # patterns restent génériques sur le nom de variable/entrée ($TIS/$ENTRY) :
+  # ils couvrent la forme de code quel que soit le type déclaré
+  # (TarArchiveInputStream, ZipInputStream...).
 
   - id: r18-slip-chemin-non-verifie
     languages: [java]
@@ -97,7 +98,7 @@ rules:
       chemin résolu.
     metadata:
       regle: R18
-      reference: docs/regles-conception.md#r18
+      reference: design-rules.md#r18
       cwe: CWE-22
     pattern-either:
       - pattern: new File($DIR, $ENTRY.getName())
@@ -117,7 +118,7 @@ rules:
       max, nombre d'entrées max).
     metadata:
       regle: R18
-      reference: docs/regles-conception.md#r18
+      reference: design-rules.md#r18
     patterns:
       - pattern-inside: |
           while (($ENTRY = $TIS.getNextEntry()) != null) {
@@ -137,16 +138,16 @@ rules:
     languages: [java]
     severity: INFO
     message: >
-      R18 — manipulation d'archive ZIP détectée. Le format imposé par la
-      DGFiP sur l'interface système d'échanges PPF est tar.gz
-      (GzipCompressorInputStream + TarArchiveInputStream), pas ZIP. Si ce
-      code traite une interface client qui accepte le ZIP, les mêmes bornes
+      R18 — manipulation d'archive ZIP détectée. Le format de référence pour
+      ce type de flux est tar.gz (GzipCompressorInputStream +
+      TarArchiveInputStream), pas ZIP, sauf si une interface externe impose
+      explicitement ZIP. Si ce code doit accepter du ZIP, les mêmes bornes
       s'appliquent (octets décompressés comptés, ratio max, entrées max,
       pas d'archive imbriquée) + spécificité ZIP : le flux DEFLATE d'une
       entrée peut dépasser la taille déclarée dans l'en-tête.
     metadata:
       regle: R18
-      reference: docs/regles-conception.md#r18
+      reference: design-rules.md#r18
     pattern-either:
       - pattern: new ZipInputStream(...)
       - pattern: new ZipFile(...)

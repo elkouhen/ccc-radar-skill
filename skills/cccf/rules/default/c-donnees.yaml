@@ -11,7 +11,7 @@ rules:
       contenu reste en object storage.
     metadata:
       regle: R12
-      reference: docs/regles-conception.md#r12
+      reference: design-rules.md#r12
     patterns:
       - pattern-either:
           - pattern: |
@@ -26,12 +26,12 @@ rules:
     severity: WARNING
     message: >
       R12 — champ byte[] sur une entité JPA (@Entity) au nom évoquant un
-      contenu de fichier. Vérifier qu'il ne s'agit pas du contenu d'une
-      facture/pièce jointe stocké en base : seule une référence S3 doit y
+      contenu de fichier. Vérifier qu'il ne s'agit pas du contenu d'un
+      fichier/pièce jointe stocké en base : seule une référence S3 doit y
       figurer.
     metadata:
       regle: R12
-      reference: docs/regles-conception.md#r12
+      reference: design-rules.md#r12
     patterns:
       - pattern-inside: |
           @Entity
@@ -41,22 +41,23 @@ rules:
       - pattern: byte[] $FIELD;
       - metavariable-regex:
           metavariable: $FIELD
-          regex: (?i).*(content|bytes|payload|fichier|file|document|facture|pdf|xml).*
+          regex: (?i).*(content|bytes|payload|fichier|file|document|pdf|xml).*
 
-  # --- R13 : archivage probant immuable ---
+  # --- R13 : archivage immuable ---
 
   - id: r13-suppression-objet-contexte-archivage
     languages: [java]
     severity: WARNING
     message: >
-      R13 — suppression d'objet S3 dans un composant d'archivage probant :
-      les archives sont immuables (Object Lock mode compliance, rétention
-      10 ans). Une suppression ne devrait exister nulle part dans ce
-      contexte — vérifier qu'il ne s'agit pas d'un contournement de la
-      rétention (ou d'un objet mal rangé dans le coffre).
+      R13 — suppression d'objet S3 dans un composant d'archivage immuable :
+      les archives sont conservées sans modification possible (Object Lock
+      mode compliance, rétention réglementaire). Une suppression ne devrait
+      exister nulle part dans ce contexte — vérifier qu'il ne s'agit pas
+      d'un contournement de la rétention (ou d'un objet mal rangé dans le
+      composant d'archivage).
     metadata:
       regle: R13
-      reference: docs/regles-conception.md#r13
+      reference: design-rules.md#r13
     patterns:
       - pattern-either:
           - pattern: $S3.deleteObject(...)

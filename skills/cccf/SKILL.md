@@ -28,7 +28,12 @@ This skill bundles two Semgrep rule packs:
   streaming for files (`a-memoire-fichiers.yaml`, R1-R3), Kafka claim-check
   and delivery guarantees (`b-kafka.yaml`, R5-R10), object storage as the
   source of truth for file data (`c-donnees.yaml`, R12-R13), and safe
-  PDF/archive handling (`d-pdf-archives.yaml`, R17-R18).
+  PDF/archive handling (`d-pdf-archives.yaml`, R17-R18). The prose behind
+  each rule ID (including the design-only rules not enforced by a Semgrep
+  pattern — R4, R9, R11, R14-R16) lives in
+  [`rules/default/design-rules.md`](rules/default/design-rules.md), which
+  travels with the pack when copied into a target repo so the `reference:
+  design-rules.md#rN` in each rule's metadata keeps resolving.
 - `liveness` ([`rules/liveness/`](rules/liveness/)) — cross-cutting rules
   for distributed-system blocking points in a REST + Kafka microservices
   landscape (see `ccc-findings`'s `archive/BACKLOG-10.md` K8): missing HTTP

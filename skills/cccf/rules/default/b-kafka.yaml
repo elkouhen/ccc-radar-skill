@@ -11,7 +11,7 @@ rules:
       taille et un format — jamais le contenu (claim check).
     metadata:
       regle: R5
-      reference: docs/regles-conception.md#r5
+      reference: design-rules.md#r5
     patterns:
       - pattern-either:
           - pattern: new ProducerRecord($TOPIC, $KEY, $VAL)
@@ -34,7 +34,7 @@ rules:
       l'événement qu'il faut corriger (référence S3, pas le contenu).
     metadata:
       regle: R5
-      reference: docs/regles-conception.md#r5
+      reference: design-rules.md#r5
     pattern-either:
       - pattern: $PROPS.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, $V)
       - pattern: $PROPS.put("max.request.size", $V)
@@ -44,20 +44,21 @@ rules:
       - pattern: $PROPS.put("max.partition.fetch.bytes", $V)
       - pattern: $PROPS.put("fetch.max.bytes", $V)
 
-  # --- R6 : partitionnement par clé métier, ordre garanti par facture ---
+  # --- R6 : partitionnement par clé métier, ordre garanti par entité ---
 
   - id: r6-envoi-kafka-sans-cle-de-partition
     languages: [java]
     severity: WARNING
     message: >
       R6 — envoi Kafka sans clé de partition : la répartition se fait en
-      round-robin/sticky et l'ordre des événements d'une même facture n'est
-      plus garanti. Sur les topics métier, partitionner par clé
-      (factureId, sirenEmetteur, lotId selon le topic). Une absence de clé
-      n'est acceptable que si aucun consommateur ne dépend de l'ordre.
+      round-robin/sticky et l'ordre des événements d'une même entité n'est
+      plus garanti. Sur les topics métier, partitionner par clé (un
+      identifiant métier stable, ou une clé de lot selon le topic). Une
+      absence de clé n'est acceptable que si aucun consommateur ne dépend de
+      l'ordre.
     metadata:
       regle: R6
-      reference: docs/regles-conception.md#r6
+      reference: design-rules.md#r6
     pattern-either:
       - pattern: new ProducerRecord($TOPIC, $VAL)
       - patterns:
@@ -79,7 +80,7 @@ rules:
       requise pour de l'at-least-once fiable.
     metadata:
       regle: R7
-      reference: docs/regles-conception.md#r7
+      reference: design-rules.md#r7
     patterns:
       - pattern-either:
           - pattern: $PROPS.put(ProducerConfig.ACKS_CONFIG, "0")
@@ -98,7 +99,7 @@ rules:
       retry producteur.
     metadata:
       regle: R7
-      reference: docs/regles-conception.md#r7
+      reference: design-rules.md#r7
     patterns:
       - pattern-either:
           - pattern: $PROPS.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, false)
@@ -117,7 +118,7 @@ rules:
       rejouable + déduplication par clé métier.
     metadata:
       regle: R7
-      reference: docs/regles-conception.md#r7
+      reference: design-rules.md#r7
     pattern-either:
       - pattern: $PROPS.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
       - pattern: $PROPS.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true")
@@ -137,7 +138,7 @@ rules:
       la même transaction PostgreSQL, relais Debezium/poller vers Kafka).
     metadata:
       regle: R8
-      reference: docs/regles-conception.md#r8
+      reference: design-rules.md#r8
     patterns:
       - pattern-either:
           - pattern: |
@@ -166,7 +167,7 @@ rules:
       avalage silencieux de l'erreur.
     metadata:
       regle: R10
-      reference: docs/regles-conception.md#r10
+      reference: design-rules.md#r10
     patterns:
       - pattern-inside: |
           @KafkaListener(...)

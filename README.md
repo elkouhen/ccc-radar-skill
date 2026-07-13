@@ -14,7 +14,9 @@ automatically by the agent.
   Semgrep rule pack (Java) for bounded file streaming, Kafka
   claim-check/delivery guarantees, object storage as source of truth, and
   safe PDF/archive handling, run by default on `cccf init` (see
-  **Default Rules** in `SKILL.md`).
+  **Default Rules** in `SKILL.md`); `design-rules.md` in the same directory
+  documents the full rule set in prose (including the rules with no
+  Semgrep-detectable pattern).
 - [`skills/cccf/rules/liveness/`](skills/cccf/rules/liveness/) — bundled
   Semgrep rule pack (Python + Java) for distributed-system blocking points:
   missing HTTP timeouts, blocking waits, synchronous REST calls inside
