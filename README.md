@@ -26,6 +26,13 @@ automatically by the agent.
   `RestTemplate` call sites) for `cccf graph` — not a findings pack, not run
   automatically at `cccf init` yet (see `ccc-findings`'s `archive/
   BACKLOG-10.md` K11).
+- [`skills/cccf/rules/kafka/`](skills/cccf/rules/kafka/) — bundled Semgrep
+  rule pack (Java/Spring) that inventories Kafka producers/consumers
+  (`@KafkaListener`, `KafkaTemplate.send`, `ProducerRecord`) for `cccf
+  graph`, resolving topic names given as Spring properties
+  (`${app.kafka.topics.orders}`) against `application.yml`/`.properties`
+  when present — not a findings pack, not run automatically at `cccf init`
+  yet (see `ccc-findings`'s `archive/BACKLOG-10.md` K2).
 
 ## Installation
 
