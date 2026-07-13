@@ -21,37 +21,50 @@ The agent owns the `cccf` lifecycle for the current project — initialization, 
 
 ### Default Rules
 
-This skill bundles a Semgrep rule set ([`rules/default/`](rules/default/)) —
-Java rules for bounded, streaming-safe handling of files, Kafka events, and
-data storage: bounded streaming for files (`a-memoire-fichiers.yaml`,
-R1-R3), Kafka claim-check and delivery guarantees (`b-kafka.yaml`, R5-R10),
-object storage as the source of truth for file data (`c-donnees.yaml`,
-R12-R13), and safe PDF/archive handling (`d-pdf-archives.yaml`, R17-R18).
+This skill bundles two Semgrep rule packs:
 
-Run all four **by default** on `cccf init`, unless the user explicitly asks
-for a different rule set:
+- `default` ([`rules/default/`](rules/default/)) — Java rules for bounded,
+  streaming-safe handling of files, Kafka events, and data storage: bounded
+  streaming for files (`a-memoire-fichiers.yaml`, R1-R3), Kafka claim-check
+  and delivery guarantees (`b-kafka.yaml`, R5-R10), object storage as the
+  source of truth for file data (`c-donnees.yaml`, R12-R13), and safe
+  PDF/archive handling (`d-pdf-archives.yaml`, R17-R18).
+- `liveness` ([`rules/liveness/`](rules/liveness/)) — cross-cutting rules
+  for distributed-system blocking points in a REST + Kafka microservices
+  landscape (see `ccc-findings`'s `archive/BACKLOG-10.md` K8): missing HTTP
+  timeouts, blocking waits without a timeout, a synchronous REST call
+  inside a Kafka consumer handler, and a network call held under a lock —
+  Python (`python.yaml`) and Java/Spring (`java.yaml`: `RestTemplate`,
+  `@KafkaListener`, `synchronized`).
 
-1. If `.cccf/config.yml` doesn't exist yet, copy the four files from
-   `rules/default/` into the target repo (e.g. `.cccf/rules/default/`) —
-   never pass an absolute path back into the skill's own directory, since
-   Semgrep derives rule identity from the `--config` path and an absolute
-   path outside the repo breaks reproducibility across machines/checkouts.
-2. Run `cccf init` with one `--rules` per copied file:
+Run all files from both packs **by default** on `cccf init`, unless the
+user explicitly asks for a different rule set:
+
+1. If `.cccf/config.yml` doesn't exist yet, copy the pack directories
+   (`rules/default/`, `rules/liveness/`) into the target repo (e.g.
+   `.cccf/rules/default/`, `.cccf/rules/liveness/`) — never pass an
+   absolute path back into the skill's own directory, since Semgrep derives
+   rule identity from the `--config` path and an absolute path outside the
+   repo breaks reproducibility across machines/checkouts.
+2. Run `cccf init` with one `--rules` per copied file (only add
+   `liveness/python.yaml` if the target repo actually has Python code):
    ```bash
    cccf init \
      --rules .cccf/rules/default/a-memoire-fichiers.yaml \
      --rules .cccf/rules/default/b-kafka.yaml \
      --rules .cccf/rules/default/c-donnees.yaml \
-     --rules .cccf/rules/default/d-pdf-archives.yaml
+     --rules .cccf/rules/default/d-pdf-archives.yaml \
+     --rules .cccf/rules/liveness/java.yaml \
+     --rules .cccf/rules/liveness/python.yaml
    ```
    This takes priority over `cccf init`'s own auto-detection (local
    `.semgrep.yml`/`semgrep.yml`/`.semgrep`, or the `p/security-audit`
    registry fallback) — explicit `--rules` always wins.
 3. If the user names additional or different rules, merge them in with more
-   `--rules` flags rather than dropping the default pack, unless the user
-   asks to replace it.
+   `--rules` flags rather than dropping the default packs, unless the user
+   asks to replace them.
 4. If `.cccf/config.yml` already exists, leave it as-is (`cccf init` refuses
-   to overwrite it) — the default pack only applies to fresh initialization.
+   to overwrite it) — the default packs only apply to fresh initialization.
 
 ## Searching the Codebase
 

@@ -15,6 +15,11 @@ automatically by the agent.
   claim-check/delivery guarantees, object storage as source of truth, and
   safe PDF/archive handling, run by default on `cccf init` (see
   **Default Rules** in `SKILL.md`).
+- [`skills/cccf/rules/liveness/`](skills/cccf/rules/liveness/) — bundled
+  Semgrep rule pack (Python + Java) for distributed-system blocking points:
+  missing HTTP timeouts, blocking waits, synchronous REST calls inside
+  Kafka consumers, network calls under a lock — also run by default on
+  `cccf init` (see **Default Rules** in `SKILL.md`).
 
 ## Installation
 
