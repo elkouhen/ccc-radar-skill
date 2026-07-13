@@ -37,8 +37,8 @@ This skill bundles two Semgrep rule packs:
   landscape (see `ccc-findings`'s `archive/BACKLOG-10.md` K8): missing HTTP
   timeouts, blocking waits without a timeout, a synchronous REST call
   inside a Kafka consumer handler, and a network call held under a lock —
-  Python (`python.yaml`) and Java/Spring (`java.yaml`: `RestTemplate`,
-  `@KafkaListener`, `synchronized`).
+  Java/Spring only (`java.yaml`: `RestTemplate`, `@KafkaListener`,
+  `synchronized`), matching the target stack (Java + Spring + Maven).
 
 Run all files from both packs **by default** on `cccf init`, unless the
 user explicitly asks for a different rule set:
@@ -49,14 +49,12 @@ user explicitly asks for a different rule set:
    absolute path back into the skill's own directory, since Semgrep derives
    rule identity from the `--config` path and an absolute path outside the
    repo breaks reproducibility across machines/checkouts.
-2. Run `cccf init` with one `--rules` per copied file (only add
-   `liveness/python.yaml` if the target repo actually has Python code):
+2. Run `cccf init` with one `--rules` per copied file:
    ```bash
    cccf init \
      --rules .cccf/rules/default/a-memoire-fichiers.yaml \
      --rules .cccf/rules/default/b-kafka.yaml \
-     --rules .cccf/rules/liveness/java.yaml \
-     --rules .cccf/rules/liveness/python.yaml
+     --rules .cccf/rules/liveness/java.yaml
    ```
    This takes priority over `cccf init`'s own auto-detection (local
    `.semgrep.yml`/`semgrep.yml`/`.semgrep`, or the `p/security-audit`

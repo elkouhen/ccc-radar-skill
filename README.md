@@ -17,10 +17,15 @@ automatically by the agent.
   documents the full rule set in prose (including the rules with no
   Semgrep-detectable pattern).
 - [`skills/cccf/rules/liveness/`](skills/cccf/rules/liveness/) — bundled
-  Semgrep rule pack (Python + Java) for distributed-system blocking points:
-  missing HTTP timeouts, blocking waits, synchronous REST calls inside
-  Kafka consumers, network calls under a lock — also run by default on
+  Semgrep rule pack (Java) for distributed-system blocking points: missing
+  HTTP timeouts, blocking waits, synchronous REST calls inside Kafka
+  consumers, network calls under a lock — also run by default on
   `cccf init` (see **Default Rules** in `SKILL.md`).
+- [`skills/cccf/rules/rest/`](skills/cccf/rules/rest/) — bundled Semgrep
+  rule pack (Java) that inventories REST endpoints (Spring routes exposed,
+  `RestTemplate` call sites) for `cccf graph` — not a findings pack, not run
+  automatically at `cccf init` yet (see `ccc-findings`'s `archive/
+  BACKLOG-10.md` K11).
 
 ## Installation
 
