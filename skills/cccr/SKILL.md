@@ -106,7 +106,7 @@ For microservice audits, prefer the following sequence:
    findings/endpoints are attributed to their module automatically, and
    `cccr graph` (no flag needed) reports real cross-module cycles and
    hotspots. Only use `--workspace <root>` when the services actually live
-   in **separate** repos indexed independently (see `cccr workspace`).
+   in **separate** repos indexed independently (see `cccr microservices`).
 4. `cccr flow <topic-or-route>` — once `graph` (or `endpoints`) surfaces a
    topic or route of interest, trace every producer/consumer or
    server/caller site for it, plus the findings that overlap each site.
