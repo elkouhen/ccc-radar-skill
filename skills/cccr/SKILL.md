@@ -15,7 +15,7 @@ Maven microservices** — it indexes:
 
 - Semgrep findings (`cccr summary`, `cccr findings`)
 - REST and Kafka endpoints (`cccr endpoints`)
-- derived blocking signals such as outbound REST calls inside Kafka consumers
+- dependencies between microservices derived from REST/Kafka endpoints
   (`cccr graph`)
 - who produces/consumes a given topic or route, across services
   (`cccr flow`)
@@ -99,13 +99,12 @@ For microservice audits, prefer the following sequence:
 
 1. `cccr summary` — quick posture: severity distribution and hot rules.
 2. `cccr endpoints` — inspect the static REST/Kafka inventory.
-3. `cccr graph` — look for outbound REST calls inside Kafka consumers first;
-   use it before diving into individual findings when the symptom is
-   distributed blocking or intermittent lock-up. For a monorepo containing
-   several Maven modules, indexing once at the parent directory is enough:
-   findings/endpoints are attributed to their module automatically, and
-   `cccr graph` (no flag needed) reports real cross-module cycles and
-   hotspots. Only use `--workspace <root>` when the services actually live
+3. `cccr graph` — surface the dependency topology between microservices from
+   indexed REST/Kafka endpoints before diving into individual findings. For a
+   monorepo containing several Maven modules, indexing once at the parent
+   directory is enough: findings/endpoints are attributed to their module
+   automatically, and `cccr graph` (no flag needed) reports real cross-module
+   dependencies. Only use `--workspace <root>` when the services actually live
    in **separate** repos indexed independently (see `cccr microservices`).
 4. `cccr flow <topic-or-route>` — once `graph` (or `endpoints`) surfaces a
    topic or route of interest, trace every producer/consumer or
@@ -204,6 +203,38 @@ cccr findings <query terms>
 Use this when the question is about a vulnerability, security issue, piece of
 technical debt, or a specific rule/finding, rather than about code semantics.
 
+### Relevant Query Patterns
+
+For the Java/Spring/Kafka audit scope of this skill, these are especially useful:
+
+```bash
+# broad vulnerability classes
+cccr findings "sql injection"
+cccr findings "command injection"
+cccr findings "unsafe yaml deserialization"
+cccr findings "weak random token generation"
+
+# Kafka / messaging security
+cccr findings "hardcoded SASL credentials"
+cccr findings "PLAINTEXT kafka security.protocol"
+cccr findings "JsonDeserializer trusted packages"
+cccr findings "Java deserialization from Kafka message"
+
+# liveness / distributed-system risks
+cccr findings "missing HTTP timeout"
+cccr findings "blocking wait without timeout"
+cccr findings "synchronous REST call inside Kafka consumer"
+cccr findings "network call under lock"
+
+# exact identifiers also work well
+cccr findings "CWE-89"
+cccr findings "custom.subprocess-shell-true"
+cccr findings "rules.kafka-security.java.spring.kafka.plaintext"
+```
+
+Start with a natural-language description of the risk. If you already know the
+finding family, prefer an exact `rule_id`, `CWE`, or a filtered query.
+
 ### Filtering Results
 
 - **By severity** (`--severity`): keep only findings at or above this level (`INFO` / `WARNING` / `ERROR`).
@@ -240,7 +271,7 @@ Prefer the least expensive query that answers the question, escalating only
 as needed:
 
 1. **Architecture overview** — `cccr summary`, then `cccr endpoints`.
-2. **Distributed blocking suspicion** — `cccr graph`.
+2. **Microservice dependency overview** — `cccr graph`.
 3. **Targeted findings lookup** — `cccr findings <query>`.
 4. **Code + findings** — `cccr search <query>` when the question is primarily about code semantics.
 
