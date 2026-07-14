@@ -33,13 +33,15 @@ automatically by the agent.
 - [`skills/cccf/rules/kafka/`](skills/cccf/rules/kafka/) — bundled Semgrep
   rule pack (Java/Spring, plus raw `kafka-clients`) that inventories Kafka
   producers/consumers (`@KafkaListener`, `KafkaTemplate.send`,
-  `ProducerRecord`, and `KafkaConsumer.subscribe(...)` for non-Spring
-  consumers) for `cccf endpoints`/`cccf graph`, resolving topic names given
+  `ProducerRecord`, `KafkaConsumer.subscribe(...)` for non-Spring
+  consumers, and `StreamsBuilder.stream(...)`/`KStream.to(...)` for Kafka
+  Streams) for `cccf endpoints`/`cccf graph`, resolving topic names given
   as Spring properties (`${app.kafka.topics.orders}`, including via a
   `@Value`-annotated field referenced by variable) against
   `application.yml`/`.properties` when present — not a findings pack, run
   by default on `cccf init` (see
-  `ccc-findings`'s `archive/BACKLOG-10.md` K2).
+  `ccc-findings`'s `archive/BACKLOG-10.md` K2, and `BACKLOG.md` Q25 for the
+  Kafka Streams rules).
 - [`skills/cccf/rules/kafka-security/`](skills/cccf/rules/kafka-security/)
   — bundled Semgrep rule pack (Java/Spring) for Kafka security findings:
   hardcoded SASL credentials, `PLAINTEXT` security protocol, a
