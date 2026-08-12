@@ -1,6 +1,6 @@
-# codeatlas-skill
+# systemlens-skill
 
-Coding-agent skill for `codeatlas`, a local Java/Spring architecture explorer based
+Coding-agent skill for `systemlens`, a local Java/Spring architecture explorer based
 on source ASTs.
 
 The skill guides an agent through initialization, incremental indexing and
@@ -11,34 +11,34 @@ collections, modules, dependencies and topology risks.
 
 ```bash
 npx skills add elkouhen/ccc-radar-skill
-uv tool install codeatlas
+uv tool install systemlens
 ```
 
 In the Java/Spring repository to inspect:
 
 ```bash
-codeatlas init
-codeatlas doctor
-codeatlas index
-codeatlas analyze audit
+systemlens init
+systemlens doctor
+systemlens index
+systemlens analyze audit
 ```
 
 No rule packs or external code-analysis tool are required.
 
 ## Contents
 
-- [`skills/codeatlas/SKILL.md`](skills/codeatlas/SKILL.md) — architecture-first workflow.
-- [`skills/codeatlas/references/settings.md`](skills/codeatlas/references/settings.md) —
+- [`skills/systemlens/SKILL.md`](skills/systemlens/SKILL.md) — architecture-first workflow.
+- [`skills/systemlens/references/settings.md`](skills/systemlens/references/settings.md) —
   project configuration.
-- [`skills/codeatlas/references/management.md`](skills/codeatlas/references/management.md)
+- [`skills/systemlens/references/management.md`](skills/systemlens/references/management.md)
   — installation, MCP setup and troubleshooting.
 
 ## MCP
 
-Start `codeatlas mcp` from an initialized repository. For Codex:
+Start `systemlens mcp` from an initialized repository. For Codex:
 
 ```bash
-codex mcp add codeatlas -- codeatlas mcp
+codex mcp add systemlens -- systemlens mcp
 ```
 
 ## License
