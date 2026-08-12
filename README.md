@@ -1,6 +1,6 @@
-# ccc-radar-skill
+# archlens-skill
 
-Coding-agent skill for `cccr`, a local Java/Spring architecture explorer based
+Coding-agent skill for `archlens`, a local Java/Spring architecture explorer based
 on source ASTs.
 
 The skill guides an agent through initialization, incremental indexing and
@@ -11,34 +11,34 @@ collections, modules, dependencies and topology risks.
 
 ```bash
 npx skills add elkouhen/ccc-radar-skill
-uv tool install ccc-radar
+uv tool install archlens
 ```
 
 In the Java/Spring repository to inspect:
 
 ```bash
-cccr init
-cccr doctor
-cccr index
-cccr analyze audit
+archlens init
+archlens doctor
+archlens index
+archlens analyze audit
 ```
 
 No rule packs or external code-analysis tool are required.
 
 ## Contents
 
-- [`skills/cccr/SKILL.md`](skills/cccr/SKILL.md) — architecture-first workflow.
-- [`skills/cccr/references/settings.md`](skills/cccr/references/settings.md) —
+- [`skills/archlens/SKILL.md`](skills/archlens/SKILL.md) — architecture-first workflow.
+- [`skills/archlens/references/settings.md`](skills/archlens/references/settings.md) —
   project configuration.
-- [`skills/cccr/references/management.md`](skills/cccr/references/management.md)
+- [`skills/archlens/references/management.md`](skills/archlens/references/management.md)
   — installation, MCP setup and troubleshooting.
 
 ## MCP
 
-Start `cccr mcp` from an initialized repository. For Codex:
+Start `archlens mcp` from an initialized repository. For Codex:
 
 ```bash
-codex mcp add cccr -- cccr mcp
+codex mcp add archlens -- archlens mcp
 ```
 
 ## License
