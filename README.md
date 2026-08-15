@@ -10,7 +10,7 @@ collections, modules, dependencies and topology risks.
 ## Install
 
 ```bash
-npx skills add elkouhen/ccc-radar-skill
+npx skills add elkouhen/systemlens-skill
 uv tool install systemlens
 ```
 
@@ -20,10 +20,13 @@ In the Java/Spring repository to inspect:
 systemlens init
 systemlens doctor
 systemlens index
+systemlens analyze coverage
+systemlens analyze indexing-issues
 systemlens analyze audit
 ```
 
-No rule packs or external code-analysis tool are required.
+SystemLens uses local Java/Spring ASTs. No model download, rule pack or external
+code-analysis service is required.
 
 ## Contents
 

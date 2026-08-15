@@ -6,12 +6,11 @@
 
 ```bash
 uv tool install systemlens
-env -u SSL_CERT_FILE uvx --from huggingface_hub hf download \
-  jinaai/jina-code-embeddings-1.5b \
-  --local-dir ~/models/jina-code-embeddings-1.5b
+systemlens version
 ```
 
-The local embedding model is optional for architecture extraction.
+Architecture extraction is local and does not require a model download, rule
+pack or external code-analysis service.
 
 ## Project initialization
 
@@ -45,12 +44,15 @@ For another MCP-compatible client:
 - After code changes: run `systemlens index`.
 - After a broad refactor or extractor upgrade: run `systemlens index --full`.
 - Use `systemlens microservices`, `systemlens topics`, `systemlens apis`, `systemlens mongodb`,
-  `systemlens modules` and `systemlens analyze audit` for architecture questions.
+  `systemlens dtos`, `systemlens modules`, `systemlens analyze coverage`,
+  `systemlens analyze indexing-issues` and `systemlens analyze audit` for architecture questions.
+- Use `systemlens index --topic-strategy strategy1` only for repositories that
+  follow the documented Strategy1 Kafka and REST conventions.
 
 ## Troubleshooting
 
 - `systemlens` missing: install `systemlens`.
 - Missing configuration: run `systemlens init` from the target repository.
 - Absent index: run `systemlens index`.
-- Embedding-model issue: extraction still works; configure a valid local model
-  only when an embedding feature is needed.
+- Unresolved facts: run `systemlens analyze indexing-issues --json` and inspect
+  the recorded source evidence; do not replace them with guessed dependencies.

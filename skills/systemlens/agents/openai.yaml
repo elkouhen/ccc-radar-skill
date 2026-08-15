@@ -1,0 +1,4 @@
+interface:
+  display_name: "SystemLens"
+  short_description: "Explore Java/Spring architecture"
+  default_prompt: "Use $systemlens to inspect this Java/Spring repository architecture."
