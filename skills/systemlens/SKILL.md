@@ -89,6 +89,24 @@ It may derive convention-based Kafka and configured HTTP dependencies. Treat
 these as convention-derived facts and inspect their source evidence. Do not
 enable this strategy solely to make an expected relation appear.
 
+## Runtime APM digest
+
+When read-only Elasticsearch access is configured and the user needs observed
+runtime service dependencies, errors, or latency, export a bounded APM digest:
+
+```bash
+systemlens apm doctor --json
+systemlens apm export --since 1h --environment production --out apm-digest.json
+```
+
+Configure `SYSTEMLENS_ELASTICSEARCH_URL` and
+`SYSTEMLENS_ELASTICSEARCH_API_KEY` in the shell; do not put credentials in a
+command, report, or prompt. The digest contains `service_destination` metric
+aggregates only, never raw spans or request data. It is a one-shot observed
+dataset: it is not persisted in the SystemLens index, surfaced through MCP, or
+evidence for a static source relationship. Check `coverage` before treating an
+absent relation as conclusive, because the aggregation and export are bounded.
+
 ## Exports and MCP
 
 ```bash
