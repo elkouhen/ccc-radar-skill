@@ -89,7 +89,7 @@ It may derive convention-based Kafka and configured HTTP dependencies. Treat
 these as convention-derived facts and inspect their source evidence. Do not
 enable this strategy solely to make an expected relation appear.
 
-## Runtime APM digest
+## Runtime APM investigation
 
 When read-only Elasticsearch access is configured and the user needs observed
 runtime service dependencies, errors, or latency, export a bounded APM digest:
@@ -106,6 +106,21 @@ aggregates only, never raw spans or request data. It is a one-shot observed
 dataset: it is not persisted in the SystemLens index, surfaced through MCP, or
 evidence for a static source relationship. Check `coverage` before treating an
 absent relation as conclusive, because the aggregation and export are bounded.
+
+For a human performance investigation, produce the explicit self-contained
+runtime report instead of asking an agent to interpret raw APM events:
+
+```bash
+systemlens apm report --since 1h --environment production --html apm-runtime.html
+```
+
+The report ranks service and transaction tail latency with average and P95,
+shows dependency volume, average latency and aggregate failures, and provides
+a source/target flow filter. Dependency P95 is intentionally unavailable in
+this first pass; it requires a separately approved sampled-span aggregate.
+The report contains aggregates only, not raw spans, trace IDs, request data,
+or error messages. It is observed runtime context, not evidence of a static
+source relationship; review its window and coverage before drawing conclusions.
 
 ## Exports and MCP
 
