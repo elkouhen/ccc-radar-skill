@@ -115,9 +115,11 @@ systemlens apm report --since 1h --environment production --html apm-runtime.htm
 ```
 
 The report ranks service and transaction tail latency with average and P95,
-shows dependency volume, average latency and aggregate failures, and provides
-a source/target flow filter. Dependency P95 is intentionally unavailable in
-this first pass; it requires a separately approved sampled-span aggregate.
+provides a filterable service-to-transaction ownership graph, shows dependency
+volume, average latency and aggregate failures, and provides a source/target
+flow filter. The graph does not claim that a transaction called a dependency;
+that would require a separately approved sampled-span aggregate. Dependency P95
+is intentionally unavailable in this first pass.
 The report contains aggregates only, not raw spans, trace IDs, request data,
 or error messages. It is observed runtime context, not evidence of a static
 source relationship; review its window and coverage before drawing conclusions.
