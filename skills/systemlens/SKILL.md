@@ -131,6 +131,9 @@ volume, average latency and aggregate failures, and provides a source/target
 flow filter. The graph does not claim that a transaction called a dependency;
 that would require a separately approved sampled-span aggregate. Dependency P95
 is intentionally unavailable in this first pass.
+Transactions are visually separated into HTTP (`request` or `http`), messaging
+(`messaging`), and other observed transaction types; filters do not change the
+underlying bounded aggregate data.
 The report contains aggregates only, not raw spans, trace IDs, request data,
 or error messages. It is observed runtime context, not evidence of a static
 source relationship; review its window and coverage before drawing conclusions.
