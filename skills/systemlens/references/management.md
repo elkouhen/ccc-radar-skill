@@ -53,6 +53,8 @@ For another MCP-compatible client:
   `model-xxx/src/main/resources/openapi/`. Contract file names in that module
   may differ from `xxx`; run `systemlens index --full --topic-strategy strategy1`
   after changing this declaration or those contracts.
+- Every build module inventories all valid YAML or JSON OpenAPI contracts in
+  its own `src/main/resources/openapi/` directory, regardless of filename.
 
 ## Troubleshooting
 

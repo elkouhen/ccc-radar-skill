@@ -96,6 +96,10 @@ contract under `model-xxx/src/main/resources/openapi/`; contract file names do
 not need to match `xxx`. Reindex with `--full --topic-strategy strategy1` after
 adding or moving a declaration or shared contract.
 
+Every build module independently inventories all valid YAML or JSON OpenAPI
+documents under its own `src/main/resources/openapi/` directory. Contract file
+names do not need to be `openapi.*` or `swagger.*`.
+
 ## Runtime APM investigation
 
 When read-only Elasticsearch access is configured and the user needs observed
