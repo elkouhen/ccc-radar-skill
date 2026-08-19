@@ -125,15 +125,14 @@ runtime report instead of asking an agent to interpret raw APM events:
 systemlens apm report --since 1h --environment production --html apm-runtime.html
 ```
 
-The report ranks service and transaction tail latency with average and P95,
-provides a filterable service-to-transaction ownership graph, shows dependency
-volume, average latency and aggregate failures, and provides a source/target
-flow filter. The graph does not claim that a transaction called a dependency;
+The report ranks service and transaction tail latency with average and P95 and
+provides an interactive directed service map. Its nodes are observed services;
+its arrows are observed dependencies, with volume and aggregate risk styling.
+Selecting a service reveals its HTTP (`request` or `http`), messaging
+(`messaging`), and other transaction aggregates plus inbound and outbound
+dependencies. The map does not claim that a transaction called a dependency;
 that would require a separately approved sampled-span aggregate. Dependency P95
 is intentionally unavailable in this first pass.
-Transactions are visually separated into HTTP (`request` or `http`), messaging
-(`messaging`), and other observed transaction types; filters do not change the
-underlying bounded aggregate data.
 The report contains aggregates only, not raw spans, trace IDs, request data,
 or error messages. It is observed runtime context, not evidence of a static
 source relationship; review its window and coverage before drawing conclusions.
