@@ -89,6 +89,13 @@ It may derive convention-based Kafka and configured HTTP dependencies. Treat
 these as convention-derived facts and inspect their source evidence. Do not
 enable this strategy solely to make an expected relation appear.
 
+For the Strategy1 OpenAPI publication convention, a declaration at
+`src/main/resources/openapi/xxx.rest` can publish valid same-named contracts
+anywhere in the repository. It also publishes every valid YAML or JSON OpenAPI
+contract under `model-xxx/src/main/resources/openapi/`; contract file names do
+not need to match `xxx`. Reindex with `--full --topic-strategy strategy1` after
+adding or moving a declaration or shared contract.
+
 ## Runtime APM investigation
 
 When read-only Elasticsearch access is configured and the user needs observed

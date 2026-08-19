@@ -48,6 +48,11 @@ For another MCP-compatible client:
   `systemlens analyze indexing-issues` and `systemlens analyze audit` for architecture questions.
 - Use `systemlens index --topic-strategy strategy1` only for repositories that
   follow the documented Strategy1 Kafka and REST conventions.
+- With Strategy1, `src/main/resources/openapi/xxx.rest` publishes valid
+  same-named contracts and every valid YAML or JSON contract in
+  `model-xxx/src/main/resources/openapi/`. Contract file names in that module
+  may differ from `xxx`; run `systemlens index --full --topic-strategy strategy1`
+  after changing this declaration or those contracts.
 
 ## Troubleshooting
 
