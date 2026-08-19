@@ -118,24 +118,30 @@ dataset: it is not persisted in the SystemLens index, surfaced through MCP, or
 evidence for a static source relationship. Check `coverage` before treating an
 absent relation as conclusive, because the aggregation and export are bounded.
 
-For a human performance investigation, produce the explicit self-contained
-runtime report instead of asking an agent to interpret raw APM events:
+For a human performance investigation, produce the explicit runtime report
+instead of asking an agent to interpret raw APM events:
 
 ```bash
 systemlens apm report --since 1h --environment production --html apm-runtime.html
 ```
 
 The report ranks service and transaction tail latency with average and P95 and
-provides an interactive directed service map. Its nodes are observed services;
-its arrows are observed dependencies, with volume and aggregate risk styling.
+provides an interactive directed service map. Circle nodes are observed
+services; diamond nodes are observed messaging targets. Arrows go from source
+service to target, are labelled HTTP or `send`, and carry volume and aggregate
+risk styling. A messaging target is not claimed to be a confirmed broker topic.
 Selecting a service reveals its HTTP (`request` or `http`), messaging
 (`messaging`), and other transaction aggregates plus inbound and outbound
 dependencies. The map does not claim that a transaction called a dependency;
 that would require a separately approved sampled-span aggregate. Dependency P95
 is intentionally unavailable in this first pass.
-The report contains aggregates only, not raw spans, trace IDs, request data,
-or error messages. It is observed runtime context, not evidence of a static
-source relationship; review its window and coverage before drawing conclusions.
+The report contains aggregates and a bounded Timeline projection of recorded
+transaction fields. It never includes `_source`, trace IDs, request data,
+headers, bodies, logs, or error messages. It is observed runtime context, not
+evidence of a static source relationship; review its window and coverage before
+drawing conclusions.
+Its interactive graph reuses the Graphology/Sigma.js CDN assets of the
+architecture export and retains an embedded SVG fallback when they are offline.
 
 ## Exports and MCP
 
